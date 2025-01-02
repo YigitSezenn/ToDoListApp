@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-   id("com.google.gms.google-services")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -42,10 +42,11 @@ android {
 
 dependencies {
 //firebase
-        implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
 
     implementation("com.google.firebase:firebase-auth")
-
+    //passwordhash
+    implementation (  "org.mindrot:jbcrypt:0.4")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

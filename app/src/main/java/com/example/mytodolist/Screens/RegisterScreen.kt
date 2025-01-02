@@ -33,9 +33,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -49,11 +53,18 @@ import com.example.mytodolist.R
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import org.mindrot.jbcrypt.BCrypt
 
 private lateinit var auth: FirebaseAuth
 fun isValidEmail(email: String): Boolean {
     return android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
 }
+fun hashPassword(password: String): String {
+    return BCrypt.hashpw(password, BCrypt.gensalt())
+    val hashedPassword = hashPassword(password)
+}
+
+
 @Composable
 fun RegisterScreen(navController: NavController) {
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
@@ -86,17 +97,25 @@ fun RegisterScreen(navController: NavController) {
             modifier = Modifier.padding(bottom = 10.dp) // Padding adjusted to match LoginScreen
         )
 
-        OutlinedTextField(
+        OutlinedTextField(textStyle = TextStyle(
+            fontFamily = FontFamily.Serif, fontStyle = FontStyle.Italic
+        ),
             value = Email,
             onValueChange = { Email = it },
-
             label = { Text("Email") },
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { /* do something */ }),
             modifier = Modifier
-                .fillMaxWidth(0.8f) // Same width as LoginScreen fields
-                .padding(bottom = 5.dp), // Adjusted spacing to match
+                .fillMaxWidth()
+                .padding(5.dp)
+                .onKeyEvent {
+                    if (it.key == Key.Enter) {/* do something */
+                        true
+                    } else {
+                        false
+                    }
+                },
             colors = TextFieldDefaults.colors(
                 focusedLeadingIconColor = Color(0xFFE8692f7),
                 unfocusedLeadingIconColor = Color(0xFFE8692f7),
@@ -107,20 +126,32 @@ fun RegisterScreen(navController: NavController) {
                 unfocusedIndicatorColor = Color(0xFFE8692f7)
             ),
             leadingIcon = {
-                Icon(imageVector = Icons.Filled.Email, contentDescription = "Email icon")
-            }
-        )
+                Icon(
+                    imageVector = Icons.Filled.Email,
+                    contentDescription = "Localized descriqption"
+                )
+            })
 
-        OutlinedTextField(
+        OutlinedTextField(textStyle = TextStyle(
+            fontFamily = FontFamily.Serif, fontStyle = FontStyle.Italic,
+        ),
             value = Password,
             onValueChange = { Password = it },
             label = { Text("Password") },
+            visualTransformation = PasswordVisualTransformation(),
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { /* do something */ }),
             modifier = Modifier
-                .fillMaxWidth(0.8f) // Same width as LoginScreen fields
-                .padding(bottom = 8.dp), // Adjusted spacing to match
+                .fillMaxWidth()
+                .padding(8.dp)
+                .onKeyEvent {
+                    if (it.key == Key.Enter) {/* do something */
+                        true
+                    } else {
+                        false
+                    }
+                },
             colors = TextFieldDefaults.colors(
                 focusedLeadingIconColor = Color(0xFFE8692f7),
                 unfocusedLeadingIconColor = Color(0xFFE8692f7),
@@ -131,10 +162,11 @@ fun RegisterScreen(navController: NavController) {
                 unfocusedIndicatorColor = Color(0xFFE8692f7)
             ),
             leadingIcon = {
-                Icon(imageVector = Icons.Filled.Lock, contentDescription = "Password icon")
-            },
-            visualTransformation = PasswordVisualTransformation(),
-        )
+                Icon(
+                    imageVector = Icons.Filled.Lock,
+                    contentDescription = "Localized description"
+                )
+            })
 
         Button(
             onClick = {
@@ -147,20 +179,25 @@ fun RegisterScreen(navController: NavController) {
                 } else if (Password.length < 6) { // Şifre 6 karakterden kısa ise uyarı göster
                     Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
                 }
+
                 else { // Alanlar doldurulmuşsa hesap oluştur
-                    auth.createUserWithEmailAndPassword(Email, Password)
+
+                    auth.createUserWithEmailAndPassword(Email, Password)    // Firebase ile hesap oluştur
+
                         .addOnCompleteListener { task ->
                             if (task.isSuccessful) {
 
                                 Toast.makeText(
                                     context,
-                                    "Account created successfully. Navigate to login.",
+                                    "Account created successfully. Navigate to login. }",
                                     Toast.LENGTH_LONG
                                 ).show()
+
                                 navController.navigate(NavigationItem.LoginScreen.route) // Login'e yönlendir
                             } else {
                                 Toast.makeText(context, "Account creation failed", Toast.LENGTH_SHORT).show()
                             }
+
                         }
                 }
             },
